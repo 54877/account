@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Body,
   BoxType,
@@ -14,31 +14,89 @@ import {
   SelectLabel,
   ThirdTitle,
 } from "./styled/App.styled";
-import { getData, postData } from "./styled/API";
+import { deleteData, getData, postData } from "./styled/API";
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { EditableCell } from "./component";
 
 export interface DataItem {
-  id?: string;
+  id: string;
   category: string;
+  date: string;
   amount: string;
   type: "income" | "expense";
   description: string;
 }
 
+export interface updataType {
+  key: string;
+  value: string;
+}
+
+export interface EditingCell {
+  rowId: string;
+  columnId: string;
+}
+
+interface sumType {
+  incomeTotal: string;
+  expenseTotal: string;
+  balance: string;
+}
+
+//TODO 新增LOADING 小動畫
+//TODO 新增編輯功能
+//TODO 新增篩選功能
+//TODO 新增圖表功能
+//TODO 新增登入功能
+//TODO 切換顏色
+//TODO API改JAVA+JAVA SPRING
+
 export function App() {
-  const [data, setData] = useState<DataItem[]>([]);
-  const [state, setState] = useState<boolean>(true);
-  const [information, setInformation] = useState<DataItem>({
+  const init = {
+    id: "",
     category: "",
+    date: "",
     amount: "",
     type: "expense",
     description: "",
+  } as DataItem;
+
+  const [data, setData] = useState<DataItem[]>([]);
+  const [state, setState] = useState<boolean>(true);
+  const [information, setInformation] = useState<DataItem>(init);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 15,
+  });
+  const [editingCell, setEditingCell] = useState<EditingCell>({
+    rowId: "",
+    columnId: "",
+  });
+
+  const [sumData, setSumData] = useState<sumType>({
+    incomeTotal: "",
+    expenseTotal: "",
+    balance: "",
+  });
+  const [updataInformation, setUpdataInformation] = useState<updataType>({
+    key: "",
+    value: "",
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await getData();
-        setData(res);
+        setData(res.dataSet ?? []);
+        setSumData(
+          res.sumData ?? { incomeTotal: "", expenseTotal: "", balance: "" },
+        );
       } catch (err) {
         console.error("抓取資料失敗:", err);
       }
@@ -46,6 +104,10 @@ export function App() {
 
     fetchData();
   }, [state]);
+
+  useEffect(() => {
+    console.log(updataInformation);
+  }, [updataInformation]);
 
   //information值
   const handleOnChange = (
@@ -63,15 +125,115 @@ export function App() {
     try {
       await postData(information);
       setState((prev) => !prev);
+      setInformation(init);
     } catch (err) {
       console.error("新增資料失敗:", err);
     }
   };
 
-  useEffect(() => {
-    console.log(information);
-    console.log(data);
-  }, [information, data]);
+  //刪除紀錄API
+  const deleteApi = async (id: string) => {
+    try {
+      await deleteData(id);
+      setState((prev) => !prev);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const columnHelper = createColumnHelper<DataItem>();
+
+  const columns = useMemo(
+    () => [
+      columnHelper.display({
+        id: "display",
+        header: "刪除",
+        cell: (info) => (
+          <>
+            <Button
+              onClick={() => {
+                deleteApi(info.row.original.id);
+              }}
+            >
+              刪除
+            </Button>
+          </>
+        ),
+      }),
+      columnHelper.accessor("date", {
+        header: "時間",
+        cell: (info) => <span>{info.getValue().slice(0, 10)}</span>,
+      }),
+      columnHelper.accessor("description", {
+        header: "項目",
+        cell: (info) => {
+          return (
+            <EditableCell
+              info={info}
+              editingCell={editingCell}
+              setEditingCell={setEditingCell}
+              updataInformation={updataInformation}
+              setUpdataInformation={setUpdataInformation}
+              setState={setState}
+            />
+          );
+        },
+      }),
+      columnHelper.accessor("category", {
+        header: "標籤",
+        cell: (info) => {
+          return (
+            <EditableCell
+              info={info}
+              editingCell={editingCell}
+              setEditingCell={setEditingCell}
+              updataInformation={updataInformation}
+              setUpdataInformation={setUpdataInformation}
+              setState={setState}
+            />
+          );
+        },
+      }),
+      columnHelper.accessor("amount", {
+        header: "金額",
+        cell: (info) => {
+          return (
+            <EditableCell
+              info={info}
+              editingCell={editingCell}
+              setEditingCell={setEditingCell}
+              updataInformation={updataInformation}
+              setUpdataInformation={setUpdataInformation}
+              setState={setState}
+            />
+          );
+        },
+      }),
+      columnHelper.accessor("type", {
+        header: "類型",
+        cell: (info) => (
+          <span
+            style={{
+              color: info.getValue() === "income" ? "green" : "red",
+              fontWeight: "bold",
+            }}
+          >
+            {info.getValue() === "income" ? "收入" : "支出"}
+          </span>
+        ),
+      }),
+    ],
+    [columnHelper],
+  );
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: { pagination },
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(), //基本功能
+    getPaginationRowModel: getPaginationRowModel(), //分頁功能
+  });
 
   return (
     <Body>
@@ -124,6 +286,7 @@ export function App() {
                   項目:
                   <FromInput
                     onChange={(e) => handleOnChange(e, "description")}
+                    value={information.description}
                     type="text"
                     id="項目"
                     name="項目"
@@ -134,6 +297,7 @@ export function App() {
                   標籤:
                   <FromInput
                     onChange={(e) => handleOnChange(e, "category")}
+                    value={information.category}
                     type="text"
                     id="標籤"
                     name="標籤"
@@ -144,6 +308,7 @@ export function App() {
                   金額:
                   <FromInput
                     onChange={(e) => handleOnChange(e, "amount")}
+                    value={information.amount}
                     type="text"
                     id="金額"
                     name="金額"
@@ -162,14 +327,14 @@ export function App() {
           >
             <div>
               <SectionTitle>總覽</SectionTitle>
-              <ThirdTitle>總收入: 0</ThirdTitle>
+              <ThirdTitle>總收入: {sumData.incomeTotal}</ThirdTitle>
             </div>
-            <ThirdTitle>總支出: 0</ThirdTitle>
-            <ThirdTitle>結餘: 0</ThirdTitle>
+            <ThirdTitle>總支出: {sumData.expenseTotal}</ThirdTitle>
+            <ThirdTitle>結餘: {sumData.balance}</ThirdTitle>
           </CenterBox>
 
           <CenterBox>
-            <BoxType>
+            <BoxType style={{ marginBottom: "32px" }}>
               <SectionTitle style={{ marginBottom: "0px" }}>
                 記帳列表
               </SectionTitle>
@@ -179,6 +344,100 @@ export function App() {
                 <Button>支出</Button>
               </ButtonFlexContainer>
             </BoxType>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                textAlign: "center",
+              }}
+            >
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr style={{ color: "white" }} key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        style={{ border: "1px solid white", color: "white" }}
+                        key={header.id}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+
+              <tbody>
+                {table.getRowModel().rows.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={columns.length}
+                      style={{
+                        textAlign: "center",
+                        padding: "16px",
+                        color: "white",
+                      }}
+                    >
+                      無資料
+                    </td>
+                  </tr>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <tr style={{ color: "white" }} key={row.original.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          style={{ padding: "8px", border: "1px solid white" }}
+                          key={cell.id}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "end",
+                alignItems: "center",
+                paddingTop: "16px",
+              }}
+            >
+              <Button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                上一頁
+              </Button>
+              <span style={{ margin: "0 8px", color: "white" }}>
+                {table.getState().pagination.pageIndex + 1} /{" "}
+                {table.getPageCount()}
+              </span>
+              <Button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                下一頁
+              </Button>
+              <select
+                value={table.getState().pagination.pageSize}
+                onChange={(e) => table.setPageSize(Number(e.target.value))}
+                style={{ marginLeft: "12px" }}
+              >
+                {[5, 10, 20, 50].map((size) => (
+                  <option key={size} value={size}>
+                    {size} 筆/頁
+                  </option>
+                ))}
+              </select>
+            </div>
           </CenterBox>
         </main>
       </Container>

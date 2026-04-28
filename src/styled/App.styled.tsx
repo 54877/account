@@ -2,8 +2,8 @@ import styled from "styled-components";
 
 export const Body = styled.div(({ theme: { colors } }) => ({
   backgroundColor: colors.primary,
-  height: "100vh",
   margin: "0 auto",
+  minHeight: "100vh",
 }));
 
 export const Container = styled.div(({ theme: { widths } }) => ({
@@ -100,4 +100,15 @@ export const ThirdTitle = styled.h3(({ theme: { colors, fontSizes } }) => ({
 export const ButtonFlexContainer = styled.div(({ theme: { spacing } }) => ({
   display: "flex",
   gap: spacing.lg,
+}));
+
+export const TableBox = styled.div(() => ({
+  display: "flex",
+  alignContent: "center",
+  justifyContent: "center",
+}));
+
+export const TableIcon = styled.div(({ theme: { colors } }) => ({
+  color: colors.fontColor,
+  marginLeft: "16px",
 }));

@@ -19,3 +19,16 @@ export const postData = async (data: DataItem) => {
   });
   return res.data;
 };
+
+export const deleteData = async (id: string) => {
+  const res = await api.delete(`/api/deleteData/${id}`);
+  return res;
+};
+
+export const updateData = async (key: string, value: string, id: string) => {
+  const res = await api.put(`/api/update/${id}`, {
+    key: key,
+    value: value,
+  });
+  return res;
+};
