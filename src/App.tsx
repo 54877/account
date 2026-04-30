@@ -23,17 +23,21 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { EditableCell } from "./component";
+import dayjs, { Dayjs } from "dayjs";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 export interface DataItem {
   id: string;
   category: string;
-  date: string;
+  date: Dayjs;
   amount: string;
   type: "income" | "expense";
   description: string;
 }
 
 export interface updataType {
+  rowId: string;
   key: string;
   value: string;
 }
@@ -50,7 +54,6 @@ interface sumType {
 }
 
 //TODO 新增LOADING 小動畫
-//TODO 新增編輯功能
 //TODO 新增篩選功能
 //TODO 新增圖表功能
 //TODO 新增登入功能
@@ -58,10 +61,11 @@ interface sumType {
 //TODO API改JAVA+JAVA SPRING
 
 export function App() {
+  const now = dayjs();
   const init = {
     id: "",
     category: "",
-    date: "",
+    date: now,
     amount: "",
     type: "expense",
     description: "",
@@ -69,24 +73,20 @@ export function App() {
 
   const [data, setData] = useState<DataItem[]>([]);
   const [state, setState] = useState<boolean>(true);
+  const [editingCell, setEditingCell] = useState<EditingCell>({
+    rowId: "",
+    columnId: "",
+  });
   const [information, setInformation] = useState<DataItem>(init);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 15,
-  });
-  const [editingCell, setEditingCell] = useState<EditingCell>({
-    rowId: "",
-    columnId: "",
   });
 
   const [sumData, setSumData] = useState<sumType>({
     incomeTotal: "",
     expenseTotal: "",
     balance: "",
-  });
-  const [updataInformation, setUpdataInformation] = useState<updataType>({
-    key: "",
-    value: "",
   });
 
   useEffect(() => {
@@ -105,18 +105,20 @@ export function App() {
     fetchData();
   }, [state]);
 
-  useEffect(() => {
-    console.log(updataInformation);
-  }, [updataInformation]);
-
   //information值
   const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    type: "category" | "amount" | "description" | "type",
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | Dayjs | null,
+    type: "category" | "amount" | "description" | "type" | "date",
   ) => {
-    setInformation((prev) => ({
-      ...prev,
-      [type]: e.target.value,
+    let key: string;
+    if (dayjs.isDayjs(e)) {
+      key = e.format("YYYY-MM-DD");
+    } else if (e && "target" in e) {
+      key = e.target.value;
+    }
+    setInformation((pre) => ({
+      ...pre,
+      [type]: key,
     }));
   };
 
@@ -162,7 +164,17 @@ export function App() {
       }),
       columnHelper.accessor("date", {
         header: "時間",
-        cell: (info) => <span>{info.getValue().slice(0, 10)}</span>,
+        cell: (info) => {
+          return (
+            <EditableCell
+              info={info}
+              time={true}
+              setState={setState}
+              setEditingCell={setEditingCell}
+              editingCell={editingCell}
+            />
+          );
+        },
       }),
       columnHelper.accessor("description", {
         header: "項目",
@@ -170,11 +182,9 @@ export function App() {
           return (
             <EditableCell
               info={info}
-              editingCell={editingCell}
-              setEditingCell={setEditingCell}
-              updataInformation={updataInformation}
-              setUpdataInformation={setUpdataInformation}
               setState={setState}
+              setEditingCell={setEditingCell}
+              editingCell={editingCell}
             />
           );
         },
@@ -185,11 +195,9 @@ export function App() {
           return (
             <EditableCell
               info={info}
-              editingCell={editingCell}
-              setEditingCell={setEditingCell}
-              updataInformation={updataInformation}
-              setUpdataInformation={setUpdataInformation}
               setState={setState}
+              setEditingCell={setEditingCell}
+              editingCell={editingCell}
             />
           );
         },
@@ -200,27 +208,25 @@ export function App() {
           return (
             <EditableCell
               info={info}
-              editingCell={editingCell}
-              setEditingCell={setEditingCell}
-              updataInformation={updataInformation}
-              setUpdataInformation={setUpdataInformation}
               setState={setState}
+              setEditingCell={setEditingCell}
+              editingCell={editingCell}
             />
           );
         },
       }),
       columnHelper.accessor("type", {
         header: "類型",
-        cell: (info) => (
-          <span
-            style={{
-              color: info.getValue() === "income" ? "green" : "red",
-              fontWeight: "bold",
-            }}
-          >
-            {info.getValue() === "income" ? "收入" : "支出"}
-          </span>
-        ),
+        cell: (info) => {
+          return (
+            <EditableCell
+              info={info}
+              setState={setState}
+              setEditingCell={setEditingCell}
+              editingCell={editingCell}
+            />
+          );
+        },
       }),
     ],
     [columnHelper],
@@ -266,10 +272,51 @@ export function App() {
             <CenterBox>
               <BoxType style={{ marginBottom: "16px" }}>
                 <SectionTitle>新增記帳</SectionTitle>
-                <BoxType>
-                  <SelectLabel htmlFor="類型">
+                <Button onClick={() => postDataApi()}>新增紀錄</Button>
+              </BoxType>
+
+              <BoxType style={{ alignItems: "end" }}>
+                <div style={{ maxWidth: "33%" }}>
+                  <BoxType style={{ gap: "0" }}>
+                    <label style={{ whiteSpace: "nowrap" }}>日期:</label>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        format="YYYY/MM/DD"
+                        value={
+                          information.date ? dayjs(information.date) : null
+                        }
+                        onChange={(e) => handleOnChange(e, "date")}
+                        slotProps={{
+                          textField: {
+                            size: "small",
+                            fullWidth: true,
+                            sx: {
+                              backgroundColor: "white",
+                              margin: "4px 8px",
+                              maxHeight: "36px",
+                              borderRadius: "4px",
+                            },
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </BoxType>
+                  <label htmlFor="項目">
+                    項目:
+                    <FromInput
+                      onChange={(e) => handleOnChange(e, "description")}
+                      value={information.description}
+                      type="text"
+                      id="項目"
+                      name="項目"
+                    />
+                  </label>
+                </div>
+                <div style={{ maxWidth: "33%" }}>
+                  <SelectLabel style={{ whiteSpace: "nowrap" }} htmlFor="類型">
                     類型:
                     <SelectInput
+                      style={{ margin: "4px 8px 4px 0px", width: "100%" }}
                       onChange={(e) => handleOnChange(e, "type")}
                       name="類型"
                       id="類型"
@@ -278,32 +325,17 @@ export function App() {
                       <option value="income">收入</option>
                     </SelectInput>
                   </SelectLabel>
-                  <Button onClick={() => postDataApi()}>新增紀錄</Button>
-                </BoxType>
-              </BoxType>
-              <BoxType>
-                <label htmlFor="項目">
-                  項目:
-                  <FromInput
-                    onChange={(e) => handleOnChange(e, "description")}
-                    value={information.description}
-                    type="text"
-                    id="項目"
-                    name="項目"
-                  />
-                </label>
-
-                <label htmlFor="標籤">
-                  標籤:
-                  <FromInput
-                    onChange={(e) => handleOnChange(e, "category")}
-                    value={information.category}
-                    type="text"
-                    id="標籤"
-                    name="標籤"
-                  />
-                </label>
-
+                  <label style={{ whiteSpace: "nowrap" }} htmlFor="標籤">
+                    標籤:
+                    <FromInput
+                      onChange={(e) => handleOnChange(e, "category")}
+                      value={information.category}
+                      type="text"
+                      id="標籤"
+                      name="標籤"
+                    />
+                  </label>
+                </div>
                 <label htmlFor="金額">
                   金額:
                   <FromInput

@@ -112,3 +112,13 @@ export const TableIcon = styled.div(({ theme: { colors } }) => ({
   color: colors.fontColor,
   marginLeft: "16px",
 }));
+
+export const TableColumn = styled.div(({ theme: { colors } }) => ({
+  color: colors.fontColor,
+  width: "100%",
+
+  cursor: "pointer",
+  "$:hover": {
+    color: colors.buttonHover,
+  },
+}));

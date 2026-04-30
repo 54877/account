@@ -1,25 +1,41 @@
-import { FromInput, TableBox, TableIcon } from "./styled/App.styled";
-import { DataItem, EditingCell, updataType } from "./App";
+import {
+  FromInput,
+  SelectInput,
+  TableBox,
+  TableColumn,
+  TableIcon,
+} from "./styled/App.styled";
+import { DataItem, EditingCell } from "./App";
 import { CellContext } from "@tanstack/react-table";
 import { updateData } from "./styled/API";
+import { useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { PickerValue } from "@mui/x-date-pickers/internals";
 
 export interface EditableCellProps {
-  info: CellContext<DataItem, string>;
   editingCell: EditingCell;
   setEditingCell: React.Dispatch<React.SetStateAction<EditingCell>>;
-  updataInformation: updataType;
-  setUpdataInformation: React.Dispatch<React.SetStateAction<updataType>>;
+  info: CellContext<DataItem, string | Dayjs>;
   setState: React.Dispatch<React.SetStateAction<boolean>>;
+  time?: boolean;
 }
 
 export function EditableCell({
   info,
-  editingCell,
-  setEditingCell,
-  updataInformation,
-  setUpdataInformation,
+  time,
   setState,
+  setEditingCell,
+  editingCell,
 }: EditableCellProps) {
+  const init = {
+    rowId: "",
+    columnId: "",
+  };
+  const rawValue = info.getValue();
+  const [value, setValue] = useState(rawValue as string);
+  const [valueTime, setValueTime] = useState(rawValue as Dayjs);
   const isEditing =
     editingCell?.rowId === info.row.original.id &&
     editingCell?.columnId === info.column.id;
@@ -30,49 +46,71 @@ export function EditableCell({
       rowId: info.row.original.id,
       columnId: info.column.id,
     });
-
-    setUpdataInformation({
-      key: info.column.id,
-      value: info.getValue(),
-    });
   };
 
   //確認onclick
-  const onclickCheck = async (id: string) => {
+  const onclickCheck = async () => {
     try {
-      await updateData(updataInformation.key, updataInformation.value, id);
+      await updateData(info.column.id, value, info.row.original.id);
       setState((prev) => !prev);
     } catch (err) {
       console.error(err);
     }
-    setEditingCell({
-      rowId: "",
-      columnId: "",
-    });
+    setEditingCell(init);
+  };
 
-    setUpdataInformation({
-      key: "",
-      value: "",
-    });
+  //information 值
+  const onchangeInformation = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | PickerValue | null
+    >,
+  ) => {
+    // if (time) {
+    //   setValueTime(e.target.value);
+    //   return;
+    // }
+    // setValue(e.target.value);
   };
 
   if (isEditing) {
     return (
       <TableBox>
-        <FromInput
-          autoFocus
-          value={updataInformation.value}
-          onChange={(e) =>
-            setUpdataInformation({
-              key: info.column.id,
-              value: e.target.value,
-            })
-          }
-        />
+        {info.column.id === "type" ? (
+          <SelectInput
+            onChange={(e) => onchangeInformation(e)}
+            value={value}
+            name="類型"
+            id="類型"
+          >
+            <option value="expense">支出</option>
+            <option value="income">收入</option>
+          </SelectInput>
+        ) : time ? (
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              format="YYYY/MM/DD"
+              value={valueTime}
+              // onChange={(e) => onchangeInformation(e)}
+              slotProps={{
+                textField: {
+                  size: "small",
+                  fullWidth: true,
+                  sx: {
+                    backgroundColor: "white",
+                    margin: "4px 8px",
+                    maxHeight: "36px",
+                    borderRadius: "4px",
+                  },
+                },
+              }}
+            />
+          </LocalizationProvider>
+        ) : (
+          <FromInput value={value} onChange={(e) => onchangeInformation(e)} />
+        )}
         <TableIcon
-          style={{ color: "white" }}
           onClick={() => {
-            onclickCheck(info.row.original.id);
+            onclickCheck();
           }}
         >
           <svg
@@ -85,29 +123,45 @@ export function EditableCell({
             <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
           </svg>
         </TableIcon>
+        <TableIcon
+          onClick={() => {
+            setEditingCell(init);
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="31px"
+            viewBox="0 -960 960 960"
+            width="31px"
+            fill="#EAC452"
+          >
+            <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+          </svg>
+        </TableIcon>
       </TableBox>
     );
   }
 
   return (
-    <TableBox>
-      <span>{info.getValue()}</span>
-      <TableIcon
-        style={{ color: "white" }}
-        onClick={() => {
-          onclickEdit();
-        }}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="24px"
-          viewBox="0 -960 960 960"
-          width="24px"
-          fill="#EAC452"
+    <TableColumn
+      onClick={() => {
+        onclickEdit();
+      }}
+    >
+      {info.column.id === "type" ? (
+        <span
+          style={{
+            color: rawValue === "income" ? "green" : "red",
+            fontWeight: "bold",
+          }}
         >
-          <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
-        </svg>
-      </TableIcon>
-    </TableBox>
+          {rawValue === "income" ? "收入" : "支出"}
+        </span>
+      ) : time ? (
+        <span>{dayjs(rawValue as Dayjs).format("YYYY-MM-DD")}</span>
+      ) : (
+        <span>{rawValue as string}</span>
+      )}
+    </TableColumn>
   );
 }

@@ -12,6 +12,7 @@ export const getData = async () => {
 
 export const postData = async (data: DataItem) => {
   const res = await api.post("/api/AddData", {
+    date: data.date,
     category: data.category,
     amount: data.amount,
     description: data.description,
