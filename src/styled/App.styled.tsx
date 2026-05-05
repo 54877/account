@@ -54,6 +54,7 @@ export const FromInput = styled.input(
     border: `${colors.fontColor} solid 1px`,
     borderRadius: borderRadius.sm,
     margin: "4px 8px",
+    padding: "4px 8px",
   }),
 );
 
@@ -121,4 +122,22 @@ export const TableColumn = styled.div(({ theme: { colors } }) => ({
   "$:hover": {
     color: colors.buttonHover,
   },
+}));
+
+export const TableRowTd = styled.td(({ theme: { colors } }) => ({
+  border: `1px solid ${colors.fontColor}`,
+  padding: "8px",
+}));
+
+export const NodataStyle = styled.td(({ theme: { colors } }) => ({
+  color: colors.fontColor,
+  textAlign: "center",
+  padding: "16px",
+}));
+
+export const TableColumnTh = styled.th(({ theme: { colors } }) => ({
+  border: `1px solid ${colors.fontColor}`,
+  cursor: "pointer",
+  padding: "8px",
+  color: `${colors.fontColor}`,
 }));

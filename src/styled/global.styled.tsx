@@ -65,6 +65,40 @@ export const darkTheme = {
   },
 };
 
+export const lightTheme = {
+  widths: {
+    lg: "1200px",
+    md: "992px",
+    sm: "768px",
+  },
+  colors: {
+    primary: "#FFFFFF", // 主背景（白）
+    secondary: "#F5F5F5", // 區塊背景（淡灰）
+    button: "#D4A017", // 金色稍微壓暗（白底更好看）
+    buttonHover: "#B88A12",
+    fontColor: "#1A1A1A", // 主文字（深灰，避免純黑刺眼）
+    subText: "#666666", // 次文字
+    border: "#E0E0E0", // 邊框
+  },
+  fontSizes: {
+    header: "48px",
+    xxl: "32px",
+    lg: "24px",
+    md: "16px",
+    sm: "12px",
+  },
+  spacing: {
+    lg: "24px",
+    md: "16px",
+    sm: "8px",
+  },
+  borderRadius: {
+    lg: "20px",
+    md: "16px",
+    sm: "4px",
+  },
+};
+
 export const GlobalStyle = createGlobalStyle`
   * {
     margin: 0;

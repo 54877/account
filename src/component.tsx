@@ -33,9 +33,13 @@ export function EditableCell({
     rowId: "",
     columnId: "",
   };
-  const rawValue = info.getValue();
-  const [value, setValue] = useState(rawValue as string);
-  const [valueTime, setValueTime] = useState(rawValue as Dayjs);
+  const [value, setValue] = useState<string>(() => {
+    if (time) {
+      const raw = info.row.original.date;
+      return raw ? dayjs(raw).format("YYYY-MM-DD") : "";
+    }
+    return info.getValue() as string;
+  });
   const isEditing =
     editingCell?.rowId === info.row.original.id &&
     editingCell?.columnId === info.column.id;
@@ -61,15 +65,17 @@ export function EditableCell({
 
   //information 值
   const onchangeInformation = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | PickerValue | null
-    >,
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | PickerValue
+      | null,
   ) => {
-    // if (time) {
-    //   setValueTime(e.target.value);
-    //   return;
-    // }
-    // setValue(e.target.value);
+    if (!e) return;
+    if (dayjs.isDayjs(e)) {
+      setValue(e.format("YYYY-MM-DD"));
+      return;
+    }
+    setValue(e.target.value);
   };
 
   if (isEditing) {
@@ -89,8 +95,8 @@ export function EditableCell({
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               format="YYYY/MM/DD"
-              value={valueTime}
-              // onChange={(e) => onchangeInformation(e)}
+              value={value ? dayjs(value) : null}
+              onChange={(e) => onchangeInformation(e)}
               slotProps={{
                 textField: {
                   size: "small",
@@ -151,16 +157,16 @@ export function EditableCell({
       {info.column.id === "type" ? (
         <span
           style={{
-            color: rawValue === "income" ? "green" : "red",
+            color: info.getValue() === "income" ? "green" : "red",
             fontWeight: "bold",
           }}
         >
-          {rawValue === "income" ? "收入" : "支出"}
+          {info.getValue() === "income" ? "收入" : "支出"}
         </span>
       ) : time ? (
-        <span>{dayjs(rawValue as Dayjs).format("YYYY-MM-DD")}</span>
+        <span>{dayjs(info.getValue()).format("YYYY-MM-DD")}</span>
       ) : (
-        <span>{rawValue as string}</span>
+        <span>{info.getValue() as string}</span>
       )}
     </TableColumn>
   );

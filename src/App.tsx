@@ -1,17 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Body,
   BoxType,
   Button,
-  ButtonFlexContainer,
   CenterBox,
   Container,
   FormTable,
   FromInput,
   HeaderTitle,
+  NodataStyle,
   SectionTitle,
   SelectInput,
   SelectLabel,
+  TableColumnTh,
+  TableRowTd,
   ThirdTitle,
 } from "./styled/App.styled";
 import { deleteData, getData, postData } from "./styled/API";
@@ -20,12 +22,16 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { EditableCell } from "./component";
 import dayjs, { Dayjs } from "dayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import Chart from "chart.js/auto";
+import { useTheme } from "styled-components";
 
 export interface DataItem {
   id: string;
@@ -53,14 +59,14 @@ interface sumType {
   balance: string;
 }
 
-//TODO 新增LOADING 小動畫
-//TODO 新增篩選功能
-//TODO 新增圖表功能
+interface AppProps {
+  setIsDark: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 //TODO 新增登入功能
-//TODO 切換顏色
 //TODO API改JAVA+JAVA SPRING
 
-export function App() {
+export function App({ setIsDark }: AppProps) {
   const now = dayjs();
   const init = {
     id: "",
@@ -70,9 +76,11 @@ export function App() {
     type: "expense",
     description: "",
   } as DataItem;
-
+  const theme = useTheme();
   const [data, setData] = useState<DataItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [state, setState] = useState<boolean>(true);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [editingCell, setEditingCell] = useState<EditingCell>({
     rowId: "",
     columnId: "",
@@ -82,23 +90,82 @@ export function App() {
     pageIndex: 0,
     pageSize: 15,
   });
-
+  const [pieData, setPieData] = useState<Array<string>>([]);
+  const [pieSumData, setPieSumData] = useState<number[]>([]);
   const [sumData, setSumData] = useState<sumType>({
     incomeTotal: "",
     expenseTotal: "",
     balance: "",
   });
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  //chart.js 圖表
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    if (!pieData.length) return;
+    const ctx = canvasRef.current.getContext("2d");
+
+    if (!ctx) return;
+    const myChart = new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: pieData,
+        datasets: [
+          {
+            data: pieSumData,
+            backgroundColor: [
+              "#00C2FF",
+              "#FF6B6B",
+              "#FFD93D",
+              "#6EFFA3",
+              "#B983FF",
+            ],
+            borderColor: "rgba(75, 192, 192,1)",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              color: `${theme.colors.fontColor}`,
+              font: {
+                weight: "bold",
+                size: 14,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return () => {
+      myChart.destroy();
+    };
+  }, [pieData, pieSumData, theme]);
+
+  //init data
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const res = await getData();
+        if (res.state != true) {
+          throw new Error(res.message);
+        }
+        setPieData(Object.keys(res.categoryObj));
+        setPieSumData(Object.values(res.categoryObj).map(Number));
+
         setData(res.dataSet ?? []);
         setSumData(
           res.sumData ?? { incomeTotal: "", expenseTotal: "", balance: "" },
         );
+        setLoading(false);
       } catch (err) {
         console.error("抓取資料失敗:", err);
+        setLoading(false);
       }
     };
 
@@ -144,7 +211,7 @@ export function App() {
   };
 
   const columnHelper = createColumnHelper<DataItem>();
-
+  //表格欄位設定
   const columns = useMemo(
     () => [
       columnHelper.display({
@@ -231,19 +298,43 @@ export function App() {
     ],
     [columnHelper],
   );
-
+  //table表單
   const table = useReactTable({
     data,
     columns,
-    state: { pagination },
-    onPaginationChange: setPagination,
+    state: { pagination, sorting },
+    onPaginationChange: setPagination, //分頁功能
+    onSortingChange: setSorting, //  排序功能
     getCoreRowModel: getCoreRowModel(), //基本功能
     getPaginationRowModel: getPaginationRowModel(), //分頁功能
+    getSortedRowModel: getSortedRowModel(), //排序功能
+    enableSortingRemoval: false, //點擊排序後再次點擊取消排序功能
   });
 
   return (
     <Body>
       <Container>
+        <button onClick={() => setIsDark((v) => !v)}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#EAC452"
+          >
+            <path d="M380-160q133 0 226.5-93.5T700-480q0-133-93.5-226.5T380-800h-21q-10 0-19 2 57 66 88.5 147.5T460-480q0 89-31.5 170.5T340-162q9 2 19 2h21Zm0 80q-53 0-103.5-13.5T180-134q93-54 146.5-146T380-480q0-108-53.5-200T180-826q46-27 96.5-40.5T380-880q83 0 156 31.5T663-763q54 54 85.5 127T780-480q0 83-31.5 156T663-197q-54 54-127 85.5T380-80Zm80-400Z" />
+          </svg>
+
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#EAC452"
+          >
+            <path d="M492-280q83 0 141.5-58.5T692-480q0-83-58.5-141.5T492-680q-22 0-43 4.5T408-662q54 25 85.5 74T525-480q0 59-31.5 108T408-298q20 9 41 13.5t43 4.5ZM480-28 346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-112 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z" />
+          </svg>
+        </button>
         <header
           style={{
             display: "flex",
@@ -281,20 +372,23 @@ export function App() {
                     <label style={{ whiteSpace: "nowrap" }}>日期:</label>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
-                        format="YYYY/MM/DD"
                         value={
                           information.date ? dayjs(information.date) : null
                         }
                         onChange={(e) => handleOnChange(e, "date")}
+                        format="YYYY/MM/DD"
                         slotProps={{
                           textField: {
                             size: "small",
                             fullWidth: true,
+                            variant: "outlined",
                             sx: {
                               backgroundColor: "white",
-                              margin: "4px 8px",
-                              maxHeight: "36px",
+                              m: "4px 8px",
                               borderRadius: "4px",
+                              "& fieldset": {
+                                borderColor: "black",
+                              },
                             },
                           },
                         }}
@@ -316,7 +410,12 @@ export function App() {
                   <SelectLabel style={{ whiteSpace: "nowrap" }} htmlFor="類型">
                     類型:
                     <SelectInput
-                      style={{ margin: "4px 8px 4px 0px", width: "100%" }}
+                      style={{
+                        padding: "11px 8px 11px 8px",
+                        marginRight: "8px",
+                        marginBottom: "4px",
+                        width: "100%",
+                      }}
                       onChange={(e) => handleOnChange(e, "type")}
                       name="類型"
                       id="類型"
@@ -352,17 +451,34 @@ export function App() {
 
           <CenterBox
             style={{
-              flexDirection: "column",
+              display: "flex",
               alignItems: "start",
               marginBottom: "24px",
             }}
           >
-            <div>
+            <div
+              style={{
+                maxWidth: "25%",
+                width: "100%",
+              }}
+            >
               <SectionTitle>總覽</SectionTitle>
               <ThirdTitle>總收入: {sumData.incomeTotal}</ThirdTitle>
+              <ThirdTitle>總支出: {sumData.expenseTotal}</ThirdTitle>
+              <ThirdTitle>結餘: {sumData.balance}</ThirdTitle>
             </div>
-            <ThirdTitle>總支出: {sumData.expenseTotal}</ThirdTitle>
-            <ThirdTitle>結餘: {sumData.balance}</ThirdTitle>
+            {/* 圖表 */}
+            <div
+              style={{
+                flex: "1",
+                maxHeight: "400px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <canvas ref={canvasRef} />
+            </div>
           </CenterBox>
 
           <CenterBox>
@@ -370,11 +486,6 @@ export function App() {
               <SectionTitle style={{ marginBottom: "0px" }}>
                 記帳列表
               </SectionTitle>
-              <ButtonFlexContainer>
-                <Button>全部</Button>
-                <Button>收入</Button>
-                <Button>支出</Button>
-              </ButtonFlexContainer>
             </BoxType>
             <table
               style={{
@@ -385,54 +496,55 @@ export function App() {
             >
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr style={{ color: "white" }} key={headerGroup.id}>
+                  <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <th
-                        style={{ border: "1px solid white", color: "white" }}
+                      <TableColumnTh
+                        onClick={header.column.getToggleSortingHandler()}
                         key={header.id}
                       >
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                      </th>
+                        {{
+                          asc: " 🔼",
+                          desc: " 🔽",
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </TableColumnTh>
                     ))}
                   </tr>
                 ))}
               </thead>
-
-              <tbody>
-                {table.getRowModel().rows.length === 0 ? (
+              {loading ? (
+                <tbody>
                   <tr>
-                    <td
-                      colSpan={columns.length}
-                      style={{
-                        textAlign: "center",
-                        padding: "16px",
-                        color: "white",
-                      }}
-                    >
-                      無資料
-                    </td>
+                    <NodataStyle colSpan={columns.length}>
+                      Loading...
+                    </NodataStyle>
                   </tr>
-                ) : (
-                  table.getRowModel().rows.map((row) => (
-                    <tr style={{ color: "white" }} key={row.original.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          style={{ padding: "8px", border: "1px solid white" }}
-                          key={cell.id}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </td>
-                      ))}
+                </tbody>
+              ) : (
+                <tbody>
+                  {table.getRowModel().rows.length === 0 ? (
+                    <tr>
+                      <NodataStyle colSpan={columns.length}>無資料</NodataStyle>
                     </tr>
-                  ))
-                )}
-              </tbody>
+                  ) : (
+                    table.getRowModel().rows.map((row) => (
+                      <tr key={row.original.id}>
+                        {row.getVisibleCells().map((cell) => (
+                          <TableRowTd key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableRowTd>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              )}
             </table>
             <div
               style={{
@@ -448,7 +560,9 @@ export function App() {
               >
                 上一頁
               </Button>
-              <span style={{ margin: "0 8px", color: "white" }}>
+              <span
+                style={{ margin: "0 8px", color: `${theme.colors.fontColor}` }}
+              >
                 {table.getState().pagination.pageIndex + 1} /{" "}
                 {table.getPageCount()}
               </span>
@@ -461,9 +575,14 @@ export function App() {
               <select
                 value={table.getState().pagination.pageSize}
                 onChange={(e) => table.setPageSize(Number(e.target.value))}
-                style={{ marginLeft: "12px" }}
+                style={{
+                  marginLeft: "12px",
+                  padding: "8px",
+                  borderRadius: "4px",
+                  borderColor: `${theme.colors.fontColor}`,
+                }}
               >
-                {[5, 10, 20, 50].map((size) => (
+                {[5, 10, 15, 20, 50].map((size) => (
                   <option key={size} value={size}>
                     {size} 筆/頁
                   </option>
