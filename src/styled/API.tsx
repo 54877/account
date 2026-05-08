@@ -5,14 +5,21 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-export const getData = async () => {
-  const res = await api.get("/api/expenses");
+export const getData = async (information: DataItem) => {
+  const res = await api.get("/api/expenses", {
+    params: {
+      start: information.startDate,
+      end: information.endDate,
+    },
+  });
   return res.data;
 };
 
 export const postData = async (data: DataItem) => {
+  const day =
+    typeof data.date === "string" ? data.date : data.date.format("YYYY-MM-DD");
   const res = await api.post("/api/AddData", {
-    date: data.date,
+    date: day,
     category: data.category,
     amount: data.amount,
     description: data.description,

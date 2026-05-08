@@ -10,7 +10,7 @@ export function Index() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
-      <App setIsDark={setIsDark} />
+      <App setIsDark={setIsDark} isDark={isDark} />
     </ThemeProvider>
   );
 }

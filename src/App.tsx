@@ -8,10 +8,12 @@ import {
   FormTable,
   FromInput,
   HeaderTitle,
+  ItemTitle,
   NodataStyle,
   SectionTitle,
   SelectInput,
   SelectLabel,
+  TableBox,
   TableColumnTh,
   TableRowTd,
   ThirdTitle,
@@ -40,6 +42,8 @@ export interface DataItem {
   amount: string;
   type: "income" | "expense";
   description: string;
+  startDate: string;
+  endDate: string;
 }
 
 export interface updataType {
@@ -61,12 +65,13 @@ interface sumType {
 
 interface AppProps {
   setIsDark: React.Dispatch<React.SetStateAction<boolean>>;
+  isDark: boolean;
 }
 
 //TODO 新增登入功能
 //TODO API改JAVA+JAVA SPRING
 
-export function App({ setIsDark }: AppProps) {
+export function App({ setIsDark, isDark }: AppProps) {
   const now = dayjs();
   const init = {
     id: "",
@@ -75,6 +80,8 @@ export function App({ setIsDark }: AppProps) {
     amount: "",
     type: "expense",
     description: "",
+    startDate: "",
+    endDate: "",
   } as DataItem;
   const theme = useTheme();
   const [data, setData] = useState<DataItem[]>([]);
@@ -120,7 +127,7 @@ export function App({ setIsDark }: AppProps) {
               "#6EFFA3",
               "#B983FF",
             ],
-            borderColor: "rgba(75, 192, 192,1)",
+            borderColor: "black",
           },
         ],
       },
@@ -151,7 +158,7 @@ export function App({ setIsDark }: AppProps) {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await getData();
+        const res = await getData(information);
         if (res.state != true) {
           throw new Error(res.message);
         }
@@ -175,7 +182,14 @@ export function App({ setIsDark }: AppProps) {
   //information值
   const handleOnChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | Dayjs | null,
-    type: "category" | "amount" | "description" | "type" | "date",
+    type:
+      | "category"
+      | "amount"
+      | "description"
+      | "type"
+      | "date"
+      | "startDate"
+      | "endDate",
   ) => {
     let key: string;
     if (dayjs.isDayjs(e)) {
@@ -191,12 +205,15 @@ export function App({ setIsDark }: AppProps) {
 
   //新增紀錄API
   const postDataApi = async () => {
+    setLoading(true);
     try {
       await postData(information);
       setState((prev) => !prev);
       setInformation(init);
+      setLoading(false);
     } catch (err) {
       console.error("新增資料失敗:", err);
+      setLoading(false);
     }
   };
 
@@ -315,25 +332,27 @@ export function App({ setIsDark }: AppProps) {
     <Body>
       <Container>
         <button onClick={() => setIsDark((v) => !v)}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#EAC452"
-          >
-            <path d="M380-160q133 0 226.5-93.5T700-480q0-133-93.5-226.5T380-800h-21q-10 0-19 2 57 66 88.5 147.5T460-480q0 89-31.5 170.5T340-162q9 2 19 2h21Zm0 80q-53 0-103.5-13.5T180-134q93-54 146.5-146T380-480q0-108-53.5-200T180-826q46-27 96.5-40.5T380-880q83 0 156 31.5T663-763q54 54 85.5 127T780-480q0 83-31.5 156T663-197q-54 54-127 85.5T380-80Zm80-400Z" />
-          </svg>
-
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#EAC452"
-          >
-            <path d="M492-280q83 0 141.5-58.5T692-480q0-83-58.5-141.5T492-680q-22 0-43 4.5T408-662q54 25 85.5 74T525-480q0 59-31.5 108T408-298q20 9 41 13.5t43 4.5ZM480-28 346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-112 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z" />
-          </svg>
+          {isDark ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#EAC452"
+            >
+              <path d="M380-160q133 0 226.5-93.5T700-480q0-133-93.5-226.5T380-800h-21q-10 0-19 2 57 66 88.5 147.5T460-480q0 89-31.5 170.5T340-162q9 2 19 2h21Zm0 80q-53 0-103.5-13.5T180-134q93-54 146.5-146T380-480q0-108-53.5-200T180-826q46-27 96.5-40.5T380-880q83 0 156 31.5T663-763q54 54 85.5 127T780-480q0 83-31.5 156T663-197q-54 54-127 85.5T380-80Zm80-400Z" />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#EAC452"
+            >
+              <path d="M492-280q83 0 141.5-58.5T692-480q0-83-58.5-141.5T492-680q-22 0-43 4.5T408-662q54 25 85.5 74T525-480q0 59-31.5 108T408-298q20 9 41 13.5t43 4.5ZM480-28 346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-112 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z" />
+            </svg>
+          )}
         </button>
         <header
           style={{
@@ -369,7 +388,9 @@ export function App({ setIsDark }: AppProps) {
               <BoxType style={{ alignItems: "end" }}>
                 <div style={{ maxWidth: "33%" }}>
                   <BoxType style={{ gap: "0" }}>
-                    <label style={{ whiteSpace: "nowrap" }}>日期:</label>
+                    <ItemTitle style={{ whiteSpace: "nowrap" }}>
+                      日期:
+                    </ItemTitle>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
                         value={
@@ -395,7 +416,7 @@ export function App({ setIsDark }: AppProps) {
                       />
                     </LocalizationProvider>
                   </BoxType>
-                  <label htmlFor="項目">
+                  <ItemTitle htmlFor="項目">
                     項目:
                     <FromInput
                       onChange={(e) => handleOnChange(e, "description")}
@@ -404,10 +425,10 @@ export function App({ setIsDark }: AppProps) {
                       id="項目"
                       name="項目"
                     />
-                  </label>
+                  </ItemTitle>
                 </div>
                 <div style={{ maxWidth: "33%" }}>
-                  <SelectLabel style={{ whiteSpace: "nowrap" }} htmlFor="類型">
+                  <SelectLabel htmlFor="類型">
                     類型:
                     <SelectInput
                       style={{
@@ -424,7 +445,7 @@ export function App({ setIsDark }: AppProps) {
                       <option value="income">收入</option>
                     </SelectInput>
                   </SelectLabel>
-                  <label style={{ whiteSpace: "nowrap" }} htmlFor="標籤">
+                  <ItemTitle style={{ whiteSpace: "nowrap" }} htmlFor="標籤">
                     標籤:
                     <FromInput
                       onChange={(e) => handleOnChange(e, "category")}
@@ -433,9 +454,9 @@ export function App({ setIsDark }: AppProps) {
                       id="標籤"
                       name="標籤"
                     />
-                  </label>
+                  </ItemTitle>
                 </div>
-                <label htmlFor="金額">
+                <ItemTitle htmlFor="金額">
                   金額:
                   <FromInput
                     onChange={(e) => handleOnChange(e, "amount")}
@@ -444,7 +465,7 @@ export function App({ setIsDark }: AppProps) {
                     id="金額"
                     name="金額"
                   />
-                </label>
+                </ItemTitle>
               </BoxType>
             </CenterBox>
           </FormTable>
@@ -486,6 +507,66 @@ export function App({ setIsDark }: AppProps) {
               <SectionTitle style={{ marginBottom: "0px" }}>
                 記帳列表
               </SectionTitle>
+              <TableBox style={{ gap: "16px" }}>
+                <BoxType>
+                  <ItemTitle>起始日期:</ItemTitle>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      value={
+                        information.startDate
+                          ? dayjs(information.startDate)
+                          : null
+                      }
+                      onChange={(e) => handleOnChange(e, "startDate")}
+                      format="YYYY/MM/DD"
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          fullWidth: true,
+                          variant: "outlined",
+                          sx: {
+                            backgroundColor: "white",
+                            m: "4px 8px",
+                            borderRadius: "4px",
+                            "& fieldset": {
+                              borderColor: "black",
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </BoxType>
+
+                <BoxType>
+                  <ItemTitle>結束日期:</ItemTitle>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      value={
+                        information.endDate ? dayjs(information.endDate) : null
+                      }
+                      onChange={(e) => handleOnChange(e, "endDate")}
+                      format="YYYY/MM/DD"
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          fullWidth: true,
+                          variant: "outlined",
+                          sx: {
+                            backgroundColor: "white",
+                            m: "4px 8px",
+                            borderRadius: "4px",
+                            "& fieldset": {
+                              borderColor: "black",
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </BoxType>
+                <Button onClick={() => setState((pre) => !pre)}>查詢</Button>
+              </TableBox>
             </BoxType>
             <table
               style={{

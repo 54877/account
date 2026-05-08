@@ -61,6 +61,8 @@ export const FromInput = styled.input(
 export const SelectLabel = styled.label(() => ({
   display: "flex",
   alignItems: "center",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
   gap: "8px",
 }));
 
@@ -110,6 +112,9 @@ export const TableBox = styled.div(() => ({
 }));
 
 export const TableIcon = styled.div(({ theme: { colors } }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   color: colors.fontColor,
   marginLeft: "16px",
 }));
@@ -140,4 +145,11 @@ export const TableColumnTh = styled.th(({ theme: { colors } }) => ({
   cursor: "pointer",
   padding: "8px",
   color: `${colors.fontColor}`,
+}));
+
+export const ItemTitle = styled.label(({ theme: { colors, fontSizes } }) => ({
+  color: colors.fontColor,
+  fontSize: fontSizes.lg,
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
 }));
