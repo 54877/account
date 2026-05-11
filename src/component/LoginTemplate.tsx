@@ -84,23 +84,6 @@ export const LoginTemplate = ({
           ) : (
             ""
           )}
-          {!state ? (
-            <ItemTitle
-              style={{ width: "100%", minWidth: "0px" }}
-              htmlFor="密碼"
-            >
-              密碼:
-              <FromInput
-                onChange={(e) => handleOnChange(e, "password")}
-                value={information.password}
-                type="text"
-                id="密碼"
-                name="密碼"
-              />
-            </ItemTitle>
-          ) : (
-            ""
-          )}
         </FormTable>
         <div
           style={{
