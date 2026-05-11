@@ -50,6 +50,8 @@ export const BoxType = styled.div(({ theme: { spacing } }) => ({
 
 export const FromInput = styled.input(
   ({ theme: { colors, borderRadius } }) => ({
+    flex: 1,
+    minWidth: 0,
     backgroundColor: "white",
     border: `${colors.fontColor} solid 1px`,
     borderRadius: borderRadius.sm,
@@ -148,8 +150,27 @@ export const TableColumnTh = styled.th(({ theme: { colors } }) => ({
 }));
 
 export const ItemTitle = styled.label(({ theme: { colors, fontSizes } }) => ({
+  display: "flex",
+  alignItems: "center",
+  width: "100%",
   color: colors.fontColor,
   fontSize: fontSizes.lg,
-  fontWeight: "bold",
   whiteSpace: "nowrap",
+  fontWeight: "bold",
 }));
+
+export const LoginContainer = styled.div(
+  ({ theme: { colors, borderRadius, spacing } }) => ({
+    backgroundColor: colors.primary,
+    border: `${colors.fontColor} solid 1px`,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    maxWidth: "33%",
+    width: "100%",
+    justifyContent: "center",
+    gap: spacing.lg,
+  }),
+);
