@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { DataItem } from "../";
+import { DataItem } from "../Index";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -37,6 +37,14 @@ export const updateData = async (key: string, value: string, id: string) => {
   const res = await api.put(`/api/update/${id}`, {
     key: key,
     value: value,
+  });
+  return res;
+};
+
+export const register = async (account: string, password: string) => {
+  const res = await api.post(`/api/register`, {
+    account: account,
+    password: password,
   });
   return res;
 };

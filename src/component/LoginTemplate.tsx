@@ -18,6 +18,7 @@ interface LoginTemplateProps {
   state: boolean;
   link: string;
   secLink: string;
+  fuc: () => Promise<void>;
 }
 
 export const LoginTemplate = ({
@@ -29,6 +30,7 @@ export const LoginTemplate = ({
   state,
   link,
   secLink,
+  fuc,
 }: LoginTemplateProps) => {
   const handleOnChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -39,6 +41,11 @@ export const LoginTemplate = ({
       [key]: e.target.value,
     }));
   };
+
+  const onclickFuc = () => {
+    fuc();
+  };
+
   return (
     <div
       style={{
@@ -52,7 +59,7 @@ export const LoginTemplate = ({
       <LoginContainer>
         <SectionTitle style={{ margin: 0 }}>{title}</SectionTitle>
         <FormTable
-          style={{ marginBottom: "0" }}
+          style={{ margin: "0" }}
           onSubmit={(e) => {
             e.preventDefault();
           }}
@@ -101,6 +108,8 @@ export const LoginTemplate = ({
           <NavLink to={secLink}>
             <Button>{secButton}</Button>
           </NavLink>
+
+          <Button onClick={onclickFuc}>確認</Button>
         </div>
       </LoginContainer>
     </div>
