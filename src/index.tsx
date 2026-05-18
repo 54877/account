@@ -15,7 +15,7 @@ import {
   TableRowTd,
   ThirdTitle,
 } from "./styled/App.styled";
-import { deleteData, getData, postData } from "./styled/API";
+import { deleteData, getData, postData } from "./api/ProductAPI";
 import {
   createColumnHelper,
   flexRender,

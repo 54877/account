@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { LoginTemplate } from "./component/LoginTemplate";
 import { infoProps } from "./Login";
-import { register } from "./styled/API";
 import { useNavigate } from "react-router-dom";
+import { register } from "./api/auth";
 
 export function Register() {
   const init = {
