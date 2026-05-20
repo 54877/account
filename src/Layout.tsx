@@ -12,7 +12,7 @@ export function Layout() {
   const navigate = useNavigate();
   const logout = () => {
     sessionStorage.removeItem("GSIMS_Token");
-    navigate("/");
+    navigate("/account");
   };
   return (
     <ThemeProvider theme={theme}>
@@ -27,7 +27,7 @@ export function Layout() {
               alignItems: "center",
             }}
           >
-            {location.pathname != "/" ? (
+            {location.pathname != "/account" ? (
               <Button style={{ marginRight: "16px" }} onClick={logout}>
                 登出
               </Button>

@@ -28,7 +28,7 @@ export function Login() {
       }
       sessionStorage.setItem("GSIMS_Token", token);
       toast.success("登入成功");
-      navigate("/charge");
+      navigate("/account/charge");
     } catch (err) {
       if (axios.isAxiosError(err)) {
         toast.error(err.response?.data?.message || "請求錯誤");
@@ -47,7 +47,7 @@ export function Login() {
         title="登入"
         button="註冊"
         loading={loading}
-        link="/register"
+        link="/account/register"
         state={false}
         fuc={loginApi}
       />

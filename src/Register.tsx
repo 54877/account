@@ -18,7 +18,7 @@ export function Register() {
     setLoading(true);
     try {
       await register(information.account, information.password);
-      navigate("/");
+      navigate("/account");
     } catch (err) {
       if (axios.isAxiosError(err)) {
         toast.error(err.response?.data?.message || "請求錯誤");
@@ -37,7 +37,7 @@ export function Register() {
         button="登入"
         loading={loading}
         state={true}
-        link="/"
+        link="/account"
         fuc={registerApi}
       />
     </>

@@ -25,8 +25,8 @@ const setupInterceptors = (instance: AxiosInstance) => {
         sessionStorage.removeItem("GSIMS_Token");
 
         // 避免重複跳轉
-        if (window.location.pathname !== "/") {
-          window.location.href = "/";
+        if (window.location.pathname !== "/account") {
+          window.location.href = "/account";
         }
       }
 
