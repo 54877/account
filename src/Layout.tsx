@@ -1,19 +1,25 @@
 import { useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme, GlobalStyle } from "./styled/global.styled";
-import { Outlet } from "react-router-dom";
-import { Body, HeaderTitle } from "./styled/App.styled";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Body, Button, HeaderTitle } from "./styled/App.styled";
 import { Container } from "@mui/system";
+import { Toaster } from "sonner";
 export function Layout() {
   const [isDark, setIsDark] = useState(true);
-
+  const location = useLocation();
   const theme = isDark ? darkTheme : lightTheme;
-
+  const navigate = useNavigate();
+  const logout = () => {
+    sessionStorage.removeItem("GSIMS_Token");
+    navigate("/");
+  };
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <Body>
         <Container>
+          <Toaster />
           <div
             style={{
               display: "flex",
@@ -21,6 +27,13 @@ export function Layout() {
               alignItems: "center",
             }}
           >
+            {location.pathname != "/" ? (
+              <Button style={{ marginRight: "16px" }} onClick={logout}>
+                登出
+              </Button>
+            ) : (
+              ""
+            )}
             <button onClick={() => setIsDark((v) => !v)}>
               {isDark ? (
                 <svg

@@ -10,7 +10,6 @@ const setupInterceptors = (instance: AxiosInstance) => {
         config.headers = config.headers ?? {};
         config.headers["Authorization"] = `Bearer ${token}`;
       }
-      console.log("AUTH HEADER:", config.headers?.["Authorization"]);
       return config;
     },
     (error: AxiosError) => Promise.reject(error),
@@ -26,8 +25,8 @@ const setupInterceptors = (instance: AxiosInstance) => {
         sessionStorage.removeItem("GSIMS_Token");
 
         // 避免重複跳轉
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
+        if (window.location.pathname !== "/") {
+          window.location.href = "/";
         }
       }
 

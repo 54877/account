@@ -18,7 +18,6 @@ export const register = async (account: string, password: string) => {
 };
 
 export const login = async (account: string, password: string) => {
-  console.log(account, password);
   const res = await loginApi.post(`/`, {
     account: account,
     password: password,

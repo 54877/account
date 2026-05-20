@@ -6,31 +6,30 @@ import {
   ItemTitle,
   FromInput,
   Button,
+  ThirdTitle,
 } from "../styled/App.styled";
 import { infoProps } from "../Login";
 
 interface LoginTemplateProps {
   information: infoProps;
+  loading: boolean;
   setInformation: React.Dispatch<React.SetStateAction<infoProps>>;
   title: string;
   button: string;
-  secButton: string;
-  state: boolean;
   link: string;
-  secLink: string;
+  state: boolean;
   fuc: () => Promise<void>;
 }
 
 export const LoginTemplate = ({
   information,
   setInformation,
+  loading,
   title,
   button,
-  secButton,
-  state,
   link,
-  secLink,
   fuc,
+  state,
 }: LoginTemplateProps) => {
   const handleOnChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -74,23 +73,36 @@ export const LoginTemplate = ({
               name="帳號"
             />
           </ItemTitle>
-          {!state ? (
-            <ItemTitle
-              style={{ width: "100%", minWidth: "0px" }}
-              htmlFor="密碼"
-            >
-              密碼:
-              <FromInput
-                onChange={(e) => handleOnChange(e, "password")}
-                value={information.password}
-                type="text"
-                id="密碼"
-                name="密碼"
-              />
-            </ItemTitle>
-          ) : (
-            ""
-          )}
+
+          <ItemTitle style={{ width: "100%", minWidth: "0px" }} htmlFor="密碼">
+            密碼:
+            <FromInput
+              onChange={(e) => handleOnChange(e, "password")}
+              value={information.password}
+              type="text"
+              id="密碼"
+              name="密碼"
+            />
+          </ItemTitle>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              marginRight: "8px",
+              marginTop: "8PX",
+            }}
+          >
+            {state && (
+              <div style={{ textAlign: "end" }}>
+                <ThirdTitle style={{ fontSize: "12px" }}>
+                  帳號長度為8~20位,
+                </ThirdTitle>
+                <ThirdTitle style={{ fontSize: "12px" }}>
+                  密碼需包含大小寫字母、數字、特殊字符，且長度為8~20位,
+                </ThirdTitle>
+              </div>
+            )}
+          </div>
         </FormTable>
         <div
           style={{
@@ -105,11 +117,11 @@ export const LoginTemplate = ({
           <NavLink to={link}>
             <Button>{button}</Button>
           </NavLink>
-          <NavLink to={secLink}>
-            <Button>{secButton}</Button>
-          </NavLink>
-
-          <Button onClick={onclickFuc}>確認</Button>
+          {loading ? (
+            <Button disabled>{state ? "註冊中" : "登入中"}</Button>
+          ) : (
+            <Button onClick={onclickFuc}>確認</Button>
+          )}
         </div>
       </LoginContainer>
     </div>

@@ -31,7 +31,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Chart from "chart.js/auto";
 import { useTheme } from "styled-components";
 import { EditableCell } from "./component/component";
-
+import axios from "axios";
+import { toast } from "sonner";
 export interface DataItem {
   id: string;
   category: string;
@@ -59,9 +60,6 @@ interface sumType {
   expenseTotal: string;
   balance: string;
 }
-
-//TODO 新增登入功能
-//TODO API改JAVA+JAVA SPRING
 
 export function Index() {
   const now = dayjs();
@@ -163,7 +161,10 @@ export function Index() {
         );
         setLoading(false);
       } catch (err) {
-        console.error("抓取資料失敗:", err);
+        if (axios.isAxiosError(err)) {
+          toast.error(err.response?.data?.message || "請求錯誤");
+          return;
+        }
         setLoading(false);
       }
     };
@@ -204,7 +205,10 @@ export function Index() {
       setInformation(init);
       setLoading(false);
     } catch (err) {
-      console.error("新增資料失敗:", err);
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || "請求錯誤");
+        return;
+      }
       setLoading(false);
     }
   };
@@ -215,7 +219,10 @@ export function Index() {
       await deleteData(id);
       setState((prev) => !prev);
     } catch (err) {
-      console.error(err);
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || "請求錯誤");
+        return;
+      }
     }
   };
 
