@@ -13,6 +13,7 @@ declare module "styled-components" {
       button: string;
       buttonHover: string;
       fontColor: string;
+      fontSec: string;
     };
     fontSizes: {
       header: string;
@@ -45,6 +46,7 @@ export const darkTheme = {
     button: "#EAC452",
     buttonHover: "#C49A2E",
     fontColor: "white",
+    fontSec: "#1A1A1A",
   },
   fontSizes: {
     header: "48px",
@@ -72,13 +74,12 @@ export const lightTheme = {
     sm: "768px",
   },
   colors: {
-    primary: "#FFFFFF", // 主背景（白）
-    secondary: "#F5F5F5", // 區塊背景（淡灰）
-    button: "#D4A017", // 金色稍微壓暗（白底更好看）
+    primary: "#FFFFFF",
+    secondary: "#F5F5F5",
+    button: "#D4A017",
     buttonHover: "#B88A12",
-    fontColor: "#1A1A1A", // 主文字（深灰，避免純黑刺眼）
-    subText: "#666666", // 次文字
-    border: "#E0E0E0", // 邊框
+    fontColor: "#1A1A1A",
+    fontSec: "#FFFFFF",
   },
   fontSizes: {
     header: "48px",

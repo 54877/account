@@ -7,8 +7,10 @@ import {
   FromInput,
   Button,
   ThirdTitle,
+  InputPsd,
 } from "../styled/App.styled";
 import { infoProps } from "../Login";
+import { useState } from "react";
 
 interface LoginTemplateProps {
   information: infoProps;
@@ -31,6 +33,8 @@ export const LoginTemplate = ({
   fuc,
   state,
 }: LoginTemplateProps) => {
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
   const handleOnChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     key: "account" | "password",
@@ -74,15 +78,22 @@ export const LoginTemplate = ({
             />
           </ItemTitle>
 
-          <ItemTitle style={{ width: "100%", minWidth: "0px" }} htmlFor="密碼">
+          <ItemTitle
+            style={{ width: "100%", minWidth: "0px", position: "relative" }}
+            htmlFor="密碼"
+          >
             密碼:
             <FromInput
+              style={{ width: "100%" }}
               onChange={(e) => handleOnChange(e, "password")}
               value={information.password}
-              type="text"
+              type={showPassword ? "text" : "password"}
               id="密碼"
               name="密碼"
             />
+            <InputPsd onClick={() => setShowPassword((prev) => !prev)}>
+              {showPassword ? "隱藏" : "顯示"}
+            </InputPsd>
           </ItemTitle>
           <div
             style={{
@@ -118,7 +129,7 @@ export const LoginTemplate = ({
             <Button>{button}</Button>
           </NavLink>
           {loading ? (
-            <Button disabled>{state ? "註冊中" : "登入中"}</Button>
+            <Button disabled={true}>{state ? "註冊中" : "登入中"}</Button>
           ) : (
             <Button onClick={onclickFuc}>確認</Button>
           )}

@@ -28,7 +28,7 @@ export function Login() {
       }
       sessionStorage.setItem("GSIMS_Token", token);
       toast.success("登入成功");
-      navigate("/account");
+      navigate("/charge");
     } catch (err) {
       if (axios.isAxiosError(err)) {
         toast.error(err.response?.data?.message || "請求錯誤");

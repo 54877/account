@@ -37,7 +37,7 @@ export function Register() {
         button="登入"
         loading={loading}
         state={true}
-        link="/"
+        link="/account"
         fuc={registerApi}
       />
     </>

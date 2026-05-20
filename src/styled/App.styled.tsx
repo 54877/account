@@ -174,3 +174,13 @@ export const LoginContainer = styled.div(
     gap: spacing.lg,
   }),
 );
+
+export const InputPsd = styled.span(({ theme: { colors } }) => ({
+  color: `${colors.fontSec}`,
+  position: "absolute",
+  right: "20px",
+  top: "50%",
+  transform: "translateY(-50%)",
+  cursor: "pointer",
+  userSelect: "none",
+}));
