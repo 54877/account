@@ -62,34 +62,35 @@ export const LoginTemplate = ({
       <LoginContainer>
         <SectionTitle style={{ margin: 0 }}>{title}</SectionTitle>
         <FormTable
+          autoComplete="on"
           style={{ margin: "0" }}
           onSubmit={(e) => {
             e.preventDefault();
           }}
         >
-          <ItemTitle htmlFor="帳號">
+          <ItemTitle htmlFor="username">
             帳號:
             <FromInput
               onChange={(e) => handleOnChange(e, "account")}
               value={information.account}
               type="text"
-              id="帳號"
-              name="帳號"
+              id="username"
+              name="username"
             />
           </ItemTitle>
 
           <ItemTitle
             style={{ width: "100%", minWidth: "0px", position: "relative" }}
-            htmlFor="密碼"
+            htmlFor="password"
           >
             密碼:
             <FromInput
-              style={{ width: "100%" }}
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              name="password"
+              id="password"
               onChange={(e) => handleOnChange(e, "password")}
               value={information.password}
-              type={showPassword ? "text" : "password"}
-              id="密碼"
-              name="密碼"
             />
             <InputPsd onClick={() => setShowPassword((prev) => !prev)}>
               {showPassword ? "隱藏" : "顯示"}
