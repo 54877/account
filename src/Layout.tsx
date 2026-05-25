@@ -30,7 +30,7 @@ export function Layout() {
               alignItems: "center",
             }}
           >
-            {location.pathname != "/account/" ? (
+            {location.pathname == "/account/charge" ? (
               <Button style={{ marginRight: "16px" }} onClick={logout}>
                 登出
               </Button>
