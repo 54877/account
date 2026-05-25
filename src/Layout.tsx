@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme, GlobalStyle } from "./styled/global.styled";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -12,8 +12,11 @@ export function Layout() {
   const navigate = useNavigate();
   const logout = () => {
     sessionStorage.removeItem("GSIMS_Token");
-    navigate("/account");
+    navigate("/account/");
   };
+  useEffect(() => {
+    console.log(location);
+  });
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
@@ -27,7 +30,7 @@ export function Layout() {
               alignItems: "center",
             }}
           >
-            {location.pathname != "/account" ? (
+            {location.pathname != "/account/" ? (
               <Button style={{ marginRight: "16px" }} onClick={logout}>
                 登出
               </Button>
