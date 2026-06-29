@@ -9,13 +9,13 @@ import {
   ThirdTitle,
   InputPsd,
 } from "../styled/App.styled";
-import { infoProps } from "../Login";
+import { InfoProps } from "../Login";
 import { useState } from "react";
 
 interface LoginTemplateProps {
-  information: infoProps;
+  information: InfoProps;
   loading: boolean;
-  setInformation: React.Dispatch<React.SetStateAction<infoProps>>;
+  setInformation: React.Dispatch<React.SetStateAction<InfoProps>>;
   title: string;
   button: string;
   link: string;

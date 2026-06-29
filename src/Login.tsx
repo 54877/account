@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 
-export interface infoProps {
+export interface InfoProps {
   account: string;
   password: string;
 }
@@ -16,7 +16,7 @@ export function Login() {
     password: "",
   };
   const navigate = useNavigate();
-  const [information, setInformation] = useState<infoProps>(init);
+  const [information, setInformation] = useState<InfoProps>(init);
   const [loading, setLoading] = useState<boolean>(false);
   const loginApi = async () => {
     setLoading(true);
@@ -40,17 +40,15 @@ export function Login() {
   };
 
   return (
-    <>
-      <LoginTemplate
-        information={information}
-        setInformation={setInformation}
-        title="登入"
-        button="註冊"
-        loading={loading}
-        link="/account/register"
-        state={false}
-        fuc={loginApi}
-      />
-    </>
+    <LoginTemplate
+      information={information}
+      setInformation={setInformation}
+      title="登入"
+      button="註冊"
+      loading={loading}
+      link="/account/register"
+      state={false}
+      fuc={loginApi}
+    />
   );
 }

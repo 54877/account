@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LoginTemplate } from "./component/LoginTemplate";
-import { infoProps } from "./Login";
+import { InfoProps } from "./Login";
 import { useNavigate } from "react-router-dom";
 import { register } from "./api/auth";
 import axios from "axios";
@@ -11,7 +11,7 @@ export function Register() {
     account: "",
     password: "",
   };
-  const [information, setInformation] = useState<infoProps>(init);
+  const [information, setInformation] = useState<InfoProps>(init);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const registerApi = async () => {
@@ -29,17 +29,15 @@ export function Register() {
     }
   };
   return (
-    <>
-      <LoginTemplate
-        information={information}
-        setInformation={setInformation}
-        title="註冊"
-        button="登入"
-        loading={loading}
-        state={true}
-        link="/account/"
-        fuc={registerApi}
-      />
-    </>
+    <LoginTemplate
+      information={information}
+      setInformation={setInformation}
+      title="註冊"
+      button="登入"
+      loading={loading}
+      state={true}
+      link="/account/"
+      fuc={registerApi}
+    />
   );
 }

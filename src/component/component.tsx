@@ -16,11 +16,11 @@ import {
 } from "../styled/App.styled";
 
 export interface EditableCellProps {
-  editingCell: EditingCell;
-  setEditingCell: React.Dispatch<React.SetStateAction<EditingCell>>;
-  info: CellContext<DataItem, string | Dayjs>;
-  setState: React.Dispatch<React.SetStateAction<boolean>>;
-  time?: boolean;
+  readonly editingCell: EditingCell;
+  readonly setEditingCell: React.Dispatch<React.SetStateAction<EditingCell>>;
+  readonly info: CellContext<DataItem, string | Dayjs>;
+  readonly setState: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly time?: boolean;
 }
 
 export function EditableCell({
@@ -79,6 +79,40 @@ export function EditableCell({
     setValue(e.target.value);
   };
 
+  const timeUi = () => {
+    return time ? (
+      <span>{dayjs(info.getValue()).format("YYYY-MM-DD")}</span>
+    ) : (
+      <span>{info.getValue() as string}</span>
+    );
+  };
+
+  const timeInputUi = () => {
+    return time ? (
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker
+          format="YYYY/MM/DD"
+          value={value ? dayjs(value) : null}
+          onChange={(e) => onchangeInformation(e)}
+          slotProps={{
+            textField: {
+              size: "small",
+              fullWidth: true,
+              sx: {
+                backgroundColor: "white",
+                margin: "4px 8px",
+                maxHeight: "36px",
+                borderRadius: "4px",
+              },
+            },
+          }}
+        />
+      </LocalizationProvider>
+    ) : (
+      <FromInput value={value} onChange={(e) => onchangeInformation(e)} />
+    );
+  };
+
   if (isEditing) {
     return (
       <TableBox>
@@ -92,28 +126,8 @@ export function EditableCell({
             <option value="expense">支出</option>
             <option value="income">收入</option>
           </SelectInput>
-        ) : time ? (
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              format="YYYY/MM/DD"
-              value={value ? dayjs(value) : null}
-              onChange={(e) => onchangeInformation(e)}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  fullWidth: true,
-                  sx: {
-                    backgroundColor: "white",
-                    margin: "4px 8px",
-                    maxHeight: "36px",
-                    borderRadius: "4px",
-                  },
-                },
-              }}
-            />
-          </LocalizationProvider>
         ) : (
-          <FromInput value={value} onChange={(e) => onchangeInformation(e)} />
+          timeInputUi()
         )}
         <TableIcon
           onClick={() => {
@@ -164,10 +178,8 @@ export function EditableCell({
         >
           {info.getValue() === "income" ? "收入" : "支出"}
         </span>
-      ) : time ? (
-        <span>{dayjs(info.getValue()).format("YYYY-MM-DD")}</span>
       ) : (
-        <span>{info.getValue() as string}</span>
+        timeUi()
       )}
     </TableColumn>
   );

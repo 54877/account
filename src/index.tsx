@@ -30,9 +30,9 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Chart from "chart.js/auto";
 import { useTheme } from "styled-components";
-import { EditableCell } from "./component/component";
 import axios from "axios";
 import { toast } from "sonner";
+import { DeleteCell, EditableTableCell } from "./component/columnsComponent";
 export interface DataItem {
   id: string;
   category: string;
@@ -44,7 +44,7 @@ export interface DataItem {
   endDate: string;
 }
 
-export interface updataType {
+export interface UpdataType {
   rowId: string;
   key: string;
   value: string;
@@ -55,7 +55,7 @@ export interface EditingCell {
   columnId: string;
 }
 
-interface sumType {
+interface SumType {
   incomeTotal: string;
   expenseTotal: string;
   balance: string;
@@ -89,7 +89,7 @@ export function Index() {
   });
   const [pieData, setPieData] = useState<Array<string>>([]);
   const [pieSumData, setPieSumData] = useState<number[]>([]);
-  const [sumData, setSumData] = useState<sumType>({
+  const [sumData, setSumData] = useState<SumType>({
     incomeTotal: "",
     expenseTotal: "",
     balance: "",
@@ -149,7 +149,7 @@ export function Index() {
       setLoading(true);
       try {
         const res = await getData(information);
-        if (res.state != true) {
+        if (!res.state) {
           throw new Error(res.message);
         }
         setPieData(Object.keys(res.categoryObj));
@@ -233,87 +233,41 @@ export function Index() {
       columnHelper.display({
         id: "display",
         header: "刪除",
-        cell: (info) => (
-          <>
-            <Button
-              onClick={() => {
-                deleteApi(info.row.original.id);
-              }}
-            >
-              刪除
-            </Button>
-          </>
-        ),
+        cell: (info) =>
+          DeleteCell({
+            id: info.row.original.id,
+            deleteApi,
+          }),
       }),
       columnHelper.accessor("date", {
         header: "時間",
-        cell: (info) => {
-          return (
-            <EditableCell
-              info={info}
-              time={true}
-              setState={setState}
-              setEditingCell={setEditingCell}
-              editingCell={editingCell}
-            />
-          );
-        },
+        cell: (info) =>
+          EditableTableCell({ info, setState, setEditingCell, editingCell }),
       }),
       columnHelper.accessor("description", {
         header: "項目",
-        cell: (info) => {
-          return (
-            <EditableCell
-              info={info}
-              setState={setState}
-              setEditingCell={setEditingCell}
-              editingCell={editingCell}
-            />
-          );
-        },
+        cell: (info) =>
+          EditableTableCell({ info, setState, setEditingCell, editingCell }),
       }),
       columnHelper.accessor("category", {
         header: "標籤",
-        cell: (info) => {
-          return (
-            <EditableCell
-              info={info}
-              setState={setState}
-              setEditingCell={setEditingCell}
-              editingCell={editingCell}
-            />
-          );
-        },
+        cell: (info) =>
+          EditableTableCell({ info, setState, setEditingCell, editingCell }),
       }),
       columnHelper.accessor("amount", {
         header: "金額",
-        cell: (info) => {
-          return (
-            <EditableCell
-              info={info}
-              setState={setState}
-              setEditingCell={setEditingCell}
-              editingCell={editingCell}
-            />
-          );
-        },
+        cell: (info) =>
+          EditableTableCell({ info, setState, setEditingCell, editingCell }),
       }),
       columnHelper.accessor("type", {
         header: "類型",
-        cell: (info) => {
-          return (
-            <EditableCell
-              info={info}
-              setState={setState}
-              setEditingCell={setEditingCell}
-              editingCell={editingCell}
-            />
-          );
-        },
+        cell: (info) =>
+          EditableTableCell({ info, setState, setEditingCell, editingCell }),
       }),
     ],
     [columnHelper],
   );
+
   //table表單
   const table = useReactTable({
     data,
