@@ -1,15 +1,19 @@
 import { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
+const TOKEN_KEY = "GSIMS_Token";
+
+let isRedirecting = false;
+
 const setupInterceptors = (instance: AxiosInstance) => {
-  // Request;
+  // Request
   instance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-      const token = sessionStorage.getItem("GSIMS_Token");
+      const token = sessionStorage.getItem(TOKEN_KEY);
 
       if (token) {
-        config.headers = config.headers ?? {};
-        config.headers["Authorization"] = `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token}`;
       }
+
       return config;
     },
     (error: AxiosError) => Promise.reject(error),
@@ -19,12 +23,11 @@ const setupInterceptors = (instance: AxiosInstance) => {
   instance.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
-      const status = error.response?.status;
+      if (error.response?.status === 401 && !isRedirecting) {
+        isRedirecting = true;
 
-      if (status === 401) {
-        sessionStorage.removeItem("GSIMS_Token");
+        sessionStorage.removeItem(TOKEN_KEY);
 
-        // 避免重複跳轉
         if (globalThis.location.pathname !== "/account") {
           globalThis.location.href = "/account";
         }
